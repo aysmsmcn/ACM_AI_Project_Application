@@ -10,100 +10,33 @@ All libraries used are listed in requirements.txt
 
 What I did:
 - First I converted the annotations in the dataset to YOLO formatted labels using the script convert.py
+- I randomly split the photos in the dataset into a train-validate-test split of 70-15-15
 - Then I trained the YOLO26-seg model in the finetuning.py script
   - I first ran a smoke test then the full training
+  - One of the runs failed (it is labeled "cloud_n_640")
+  - The real results are labeled "cloud_n_416"
 - Results are saved in the runs folder
-- I proceeded to evaluate the results
+- I used the scripts evaluate.py and predict.py to quantitatively and qualitatively, respectively, analyze the model's results
 
+Results:
 
+Here are a list of observations I had:
 
-### 5. Evaluate
+1. A marginal amount of the results had stacked colors, meaning it classified the same clouds as two distinct types
+2. There are many with misclassified results
+3. Fragmentation does occur, but it usually matches the true outlines provided by the dataset's annotations
+4. Many of the photos miss a few sparse clouds, especially photos taken during sunset/sunrise where the horizon is a different color
+5. It is very good at distinctly classifying background elements (labled as Arvore)
 
-```
-python scripts/evaluate.py
-```
+Limitations:
 
-Prints mask mAP overall and per class. Use `SPLIT = "val"` while experimenting. Switch
-to `"test"` only once, at the very end, so the test score stays honest.
+Some limitations I had were time and computing power. I did this all on my laptop, which doesn't have a NVIDIA GPU, so all the training had to run through my CPU instead. This made training large amounts of epochs really slow and as a result, I had to reduce the number of epochs. I think this is a large reason why the model's accuracy wasn't quite there, as it was accurate for ~75% of the photos and that value can definitely be improved.
 
-### 6. Look at predictions
+In the future, I'd improve it by just letting it train for a longer amount of time and get rid of some of tweaks I made to the training parameters to limit processing costs. For instance, I trained it on 416 pixels for pixel size and 30 epochs and in the future, I'd probably upscale the image size to 640 pixels and increase to 100 epochs for more rigorous training overall. I would also look into getting larger amounts of specifically sunset and sunrise data, as these photos were just really sparse overall in the dataset so I think the model wasn't able to pick up on them due to scarcity.
 
-```
-python scripts/predict.py
-```
+Sample Output:
+<img width="670" height="504" alt="image" src="https://github.com/user-attachments/assets/19bfec7f-32a0-417f-8001-ef2c5854306e" />
 
-Saves pictures with the predicted masks drawn on. Compare them with the real masks to
-see what the model gets wrong.
+The other outputs can be seen in the folder:
+"Computer Vision Project\src\runs\segment\predict_test"
 
-### 7. Experiment
-
-Change one setting at a time in `train.py`, give each run its own `RUN_NAME`, and
-compare on the val split. Ideas:
-
-- a larger model size (`n`, `s`, `m`)
-- a larger `IMGSZ` (photos are about 2,500 pixels wide, so thin cloud streaks can vanish at 640)
-- `freeze=10` in the `model.train()` call, which can reduce overfitting
-- `mosaic=0`, since mosaic stitches four photos into one and skies rarely look like that
-
-## Decisions made for this prototype
-
-- **Random split within each camera.** Every photo was taken on a different day, so
-  near-identical neighboring frames are not a concern, and no date table is needed.
-- **No coverage table.** The per-class counts Ultralytics prints at validation show
-  whether a class is missing from a split.
-- **Polygon rescaling skipped.** Normalized YOLO labels handle the size difference.
-- **Burned-in text left in.** It is a shortcut risk mainly for classification or when a
-  whole camera is held out. If predicted masks show odd blobs in the bottom corners, fill
-  the corner boxes with `cv2.rectangle` and re-run the split on the cleaned copies.
-- **No baselines.** A most-common-class guess, a YOLO model trained from scratch, and an
-  OpenCV red/blue color threshold would each give a reference point, but none is needed
-  to get a working model. A from-scratch run is the most instructive one to add later.
-
-## Known limitations
-
-- YOLO segmentation is instance-based, and clouds are not discrete objects. A large layer
-  may come out as several overlapping pieces. To get per-pixel scores such as mIoU, merge
-  the predicted pieces into one class map, resize it to the mask size with
-  nearest-neighbor, and compare it with `masks_machine`. That script is not written yet.
-- The `Arvore` class inflates average scores because it is large and always in the same
-  place for a given camera.
-- Mask mAP from `evaluate.py` is not the same measure as per-pixel mIoU, so do not
-  compare the two directly.
-- The scripts were written without being run on the full dataset. Folder names such as
-  `img` and `ann` are guesses to check against your download.
-
-## Troubleshooting
-
-- **"System cannot find the path specified" or "Cannot find ...":** a path in the edit
-  block is wrong, or you are running from a different folder than you think. Use full
-  paths. On Windows, write `r"C:\Users\you\..."` with the `r` before the quotes.
-- **`dataset.yaml` is found but images are not:** open it and check that its `path:` line
-  points to the real `dataset` folder. It was written when you ran `convert_labels.py`.
-- **`torch.cuda.is_available()` prints `False` even though you have an NVIDIA GPU:** pip
-  sometimes installs a CPU-only PyTorch, especially on Windows. Install the CUDA build
-  using the selector on <https://pytorch.org>, then check again.
-- **Out of GPU memory:** lower `BATCH` in `train.py` to 8 or 4, then lower `IMGSZ`.
-- **A crash right at the start of training on Windows:** keep the
-  `if __name__ == "__main__":` guard that the scripts already have.
-- **A missing-annotation error from `convert_labels.py`:** it prints the file names it
-  looked for. Compare them with the real names in your annotations folder.
-
-## Results
-
-Fill this in as you run experiments.
-
-| Run name | Model | Image size | Val mask mAP50 | Val mask mAP50-95 | Notes |
-|---|---|---|---|---|---|
-| cloud_n_640 | yolo26n-seg | 640 | | | first real run |
-
-Test split (scored once, at the end):
-
-| Model | Test mask mAP50 | Test mask mAP50-95 |
-|---|---|---|
-| | | |
-
-## Licenses
-
-Check the license terms of the dataset on its Mendeley page. As far as I know,
-Ultralytics is released under AGPL-3.0, so check its terms too before using this beyond
-a personal or course project.
