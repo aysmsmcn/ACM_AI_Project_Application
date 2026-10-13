@@ -38,6 +38,6 @@ Sample Output:
 
 <img width="670" height="504" alt="image" src="https://github.com/user-attachments/assets/19bfec7f-32a0-417f-8001-ef2c5854306e" />
 
-I've also uploaded 10 other example outputs in the repo.
+I've also uploaded 32 other example outputs in the repo.
 
 I couldn't upload everything becuase there are too many files and I'm not too familiar with GitHub so I'm not too sure how to keep it organized so I've only uploaded the scripts with code that I used.
