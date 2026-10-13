@@ -35,8 +35,9 @@ Some limitations I had were time and computing power. I did this all on my lapto
 In the future, I'd improve it by just letting it train for a longer amount of time and get rid of some of tweaks I made to the training parameters to limit processing costs. For instance, I trained it on 416 pixels for pixel size and 30 epochs and in the future, I'd probably upscale the image size to 640 pixels and increase to 100 epochs for more rigorous training overall. I would also look into getting larger amounts of specifically sunset and sunrise data, as these photos were just really sparse overall in the dataset so I think the model wasn't able to pick up on them due to scarcity.
 
 Sample Output:
+
 <img width="670" height="504" alt="image" src="https://github.com/user-attachments/assets/19bfec7f-32a0-417f-8001-ef2c5854306e" />
 
-The other outputs can be seen in the folder:
-"Computer Vision Project\src\runs\segment\predict_test"
+I've also uploaded 10 other example outputs in the repo.
 
+I couldn't upload everything becuase there are too many files and I'm not too familiar with GitHub so I'm not too sure how to keep it organized so I've only uploaded the scripts with code that I used.
