@@ -1,0 +1,7 @@
+Libraries for YOLO:
+
+ultralytics, opencv-python, torch, numpy
+ 
+Libraries used that come with Python:
+
+os, csv, json, random, shutil, pathlib
